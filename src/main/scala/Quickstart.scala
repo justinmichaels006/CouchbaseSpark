@@ -1,6 +1,3 @@
-import com.couchbase.client.java.document.JsonDocument
-import com.couchbase.client.java.document.json.JsonObject
-import com.couchbase.spark._
 import com.couchbase.spark.sql._
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.sql.sources.EqualTo
@@ -12,33 +9,31 @@ object Quickstart {
 
     // Configure Spark
     val cfg = new SparkConf()
-      .setAppName("couchbaseQuickstart") // give your app a name
-      .setMaster("spark://Justins-MacBook-Pro-2.local:7077") // set the master to local for easy experimenting
-      .set("com.couchbase.bucket.travel-sample", "") // open the travel-sample bucket
+      .setAppName("couchbaseQuickstart")
+      .setMaster("local[*]")
+      .set("com.couchbase.bucket.travel-sample", "")
 
     // Generate The Context
     val sc = new SparkContext(cfg)
-    val sql = new SQLContext(sc)
+    val sqlc = new SQLContext(sc)
 
-    sc
-      .couchbaseGet[JsonDocument](Seq("airline_10123", "airline_10748"))
-      .collect()
-      .foreach(println)
+    // Load Landmarks from HDFS
+    val landmarks = sqlc.read.couchbase(schemaFilter = EqualTo("type", "landmark"))
+    landmarks.registerTempTable("landmarks")
 
-    sc
-      .couchbaseGet[JsonDocument](Seq("airline_10123", "airline_10748"))
-      .map(oldDoc => {
-        val id = "my_" + oldDoc.id()
-        val content = JsonObject.create().put("name", oldDoc.content().getString("name"))
-        JsonDocument.create(id, content)
-      })
-      .saveToCouchbase()
+    // Load Airports from Couchbase
+    val airports = sqlc.read.couchbase(schemaFilter = EqualTo("type", "airport"))
+    airports.registerTempTable("airports")
 
-    // Create a DataFrame with Schema Inference
-    val airlines = sql.read.couchbase(schemaFilter = EqualTo("type", "airline"))
+    // find all landmarks in the same city as the given FAA code
+    val toFind = "SFO" // try SFO or LAX
 
-    // Print The Schema
-    airlines.printSchema()
+    airports
+      .join(landmarks, airports("city") === landmarks("city"))
+      .select(airports("faa"), landmarks("name"), landmarks("url"))
+      .where(airports("faa") === toFind and landmarks("url").isNotNull)
+      .orderBy(landmarks("name").asc)
+      .show(20)
 
   }
 
