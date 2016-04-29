@@ -66,7 +66,7 @@ route_5966                         //This is the key, which also acts as a prima
 }
 ```
 
-### Routes
+### Landmarks
 ```json
 landmark_21661
 {
