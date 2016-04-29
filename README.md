@@ -48,12 +48,12 @@ airport_3577
 
 ### Routes
 ```json
-route_5966                         ←This is the key, which also acts as a primary key
+route_5966                         //This is the key, which also acts as a primary key
 {
     "id": "5966",
-    "type": "route",               ←This is the type identifier for the document
+    "type": "route",              //This is the type identifier for the document
     "airline": "AA",
-    "airlineid": "airline_24",     ←This is the foreign key identifier to an airline document
+    "airlineid": "airline_24",     //This is the foreign key identifier to an airline document
     "sourceairport": "MCO",
     "destinationairport": "SEA",
     "stops": "0",
