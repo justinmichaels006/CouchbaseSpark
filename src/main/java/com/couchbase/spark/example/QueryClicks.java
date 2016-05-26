@@ -20,7 +20,6 @@ public class QueryClicks {
                 .setMaster("local[*]")
                 .set("com.couchbase.bucket.default", "");
 
-
         // Create Java context from configuration
         JavaSparkContext sc = new JavaSparkContext(conf);
 

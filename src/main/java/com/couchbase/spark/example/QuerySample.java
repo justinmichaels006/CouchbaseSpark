@@ -18,7 +18,7 @@ public class QuerySample {
         SparkConf conf = new SparkConf()
                 .setAppName("CouchbaseQuery")
                 .setMaster("local[*]")
-                .set("com.couchbase.bucket.default", "");
+                .set("com.couchbase.bucket.travel-sample", "");
 
 
         // Create Java context from configuration
@@ -31,7 +31,7 @@ public class QuerySample {
         CouchbaseSparkContext couchbaseSparkContext = CouchbaseSparkContext.couchbaseContext(sc);
 
         //String query = ("SELECT * FROM `travel-sample` WHERE type = 'airline' LIMIT 10");
-        String query = ("select gender, count(*) from default group by gender");
+        String query = ("select airline, count(*) from `travel-sample` group by airline");
 
         List<CouchbaseQueryRow> results = couchbaseSparkContext
                 .couchbaseQuery(N1qlQuery.simple(query))

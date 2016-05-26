@@ -17,7 +17,7 @@ object Quickstart {
     val sc = new SparkContext(cfg)
     val sqlc = new SQLContext(sc)
 
-    // Load Landmarks from HDFS
+    // Load Landmarks from Couchbase
     val landmarks = sqlc.read.couchbase(schemaFilter = EqualTo("type", "landmark"))
     landmarks.registerTempTable("landmarks")
 
@@ -28,12 +28,15 @@ object Quickstart {
     // find all landmarks in the same city as the given FAA code
     val toFind = "SFO" // try SFO or LAX
 
+    //Find schema
     airports
       .join(landmarks, airports("city") === landmarks("city"))
       .select(airports("faa"), landmarks("name"), landmarks("url"))
       .where(airports("faa") === toFind and landmarks("url").isNotNull)
       .orderBy(landmarks("name").asc)
       .show(20)
+
+    landmarks.printSchema()
 
   }
 
