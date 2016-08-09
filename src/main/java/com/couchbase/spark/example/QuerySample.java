@@ -30,8 +30,49 @@ public class QuerySample {
         // Create Couchbase context using static method
         CouchbaseSparkContext couchbaseSparkContext = CouchbaseSparkContext.couchbaseContext(sc);
 
-        //String query = ("SELECT * FROM `travel-sample` WHERE type = 'airline' LIMIT 10");
-        String query = ("select airline, count(*) from `travel-sample` group by airline");
+        String query = ("select name, count(*) as count from `travel-sample` group by name");
+
+        String query2 = ("explain SELECT\n" +
+                "   config.Config.CatalogId,\n" +
+                "   config.Config.FamilyName,\n" +
+                "   config.Config.Title,\n" +
+                "   (\n" +
+                "      SELECT\n" +
+                "         c.Id,\n" +
+                "         c.`Desc` as CategoryDescription,\n" +
+                "         (\n" +
+                "            SELECT\n" +
+                "               m.Id,\n" +
+                "               m.ModuleName,\n" +
+                "               m.ModuleDescription,\n" +
+                "               (\n" +
+                "                  SELECT\n" +
+                "                     o.Id,\n" +
+                "                     o.OptionName,\n" +
+                "                     o.OptionDescription,\n" +
+                "                     (\n" +
+                "                        SELECT\n" +
+                "                           s.Id,\n" +
+                "                           s.SkuName,\n" +
+                "                           s.SkuDescription\n" +
+                "                        FROM testload sku\n" +
+                "                           USE KEYS o.SKUs\n" +
+                "                           LEFT UNNEST sku.SKUs.SKU s\n" +
+                "                     ) AS SKU\n" +
+                "                  FROM testload opt\n" +
+                "                     USE KEYS m.Options\n" +
+                "                     LEFT UNNEST opt.Options.`Option` o\n" +
+                "               ) AS `Option`\n" +
+                "            FROM testload mod\n" +
+                "               USE KEYS c.Modules\n" +
+                "               LEFT UNNEST mod.Modules.Module m\n" +
+                "         ) AS Module\n" +
+                "      FROM testload cat\n" +
+                "         USE KEYS config.Config.Categories\n" +
+                "         LEFT UNNEST cat.Categories.Category c\n" +
+                "   ) AS Category\n" +
+                "FROM testload config\n" +
+                "   USE KEYS \"OC_c1660wsap_29\"\n");
 
         List<CouchbaseQueryRow> results = couchbaseSparkContext
                 .couchbaseQuery(N1qlQuery.simple(query))
