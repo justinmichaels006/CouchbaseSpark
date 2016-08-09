@@ -28,12 +28,11 @@ public class Overview {
     public static void main(String[] args) throws IOException {
 
         CouchbaseEnvironment env = DefaultCouchbaseEnvironment.builder()
-                .queryEnabled(true)
                 .dnsSrvEnabled(false)
                 //.observeIntervalDelay()
                 .build();
-        CouchbaseCluster cluster = CouchbaseCluster.create(env, "localhost");
-        Bucket bucket = cluster.openBucket("default");
+        CouchbaseCluster cluster = CouchbaseCluster.create(env, "127.0.0.1");
+        Bucket bucket = cluster.openBucket("testload");
 
         SparkConf conf = new SparkConf().setAppName("myApp").setMaster("local[*]");
         JavaSparkContext sc = new JavaSparkContext(conf);
@@ -44,7 +43,7 @@ public class Overview {
         JavaRDD<Integer> distData = sc.parallelize(data);
         System.out.println("Dist:  " + distData);
 
-        JavaRDD<String> lines = sc.textFile("/Users/justin/Documents/Demo/spark/spark-1.6.1-bin-hadoop2.6/data/mllib/sample_isotonic_regression_data.txt");
+        JavaRDD<String> lines = sc.textFile("/Users/justin/Documents/Demo/spark/spark-1.6.2-bin-hadoop2.6/data/mllib/sample_isotonic_regression_data.txt");
         JavaRDD<Integer> lineLengths = lines.map(new Function<String, Integer>() {
             public Integer call(String s) { return s.length();}
         });
